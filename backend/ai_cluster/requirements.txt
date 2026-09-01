@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sentence-transformers
+scikit-learn>=1.3.0
+opensearch-py
+opensearch-py-ml
+accelerate
+mdutils
+transformers
+langchain-community
+langchain-huggingface
+nemoguardrails
+requests
+python-dotenv

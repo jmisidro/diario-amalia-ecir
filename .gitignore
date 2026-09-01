@@ -1,0 +1,13 @@
+.env
+.env.docker
+.DS_Store
+*.DS_Store
+node_modules/
+*/node_modules/
+__pycache__/
+*.py[cod]
+.venv/*
+venv/
+
+# Embedding Model
+/backend/ai_cluster/model_output/*

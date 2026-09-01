@@ -1,0 +1,14 @@
+define bot refuse off_topic
+  "Sou um assistente do Diário do AMALIA focado estritamente em notícias e resumos diários. Apenas posso ajudar com informações sobre a atualidade."
+
+define bot allow_passthrough
+  "PASS"
+
+define flow self check input
+  $allowed = execute self_check_input
+  if not $allowed
+    bot refuse off_topic
+    stop
+  else
+    bot allow_passthrough
+    stop

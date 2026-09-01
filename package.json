@@ -1,0 +1,48 @@
+{
+  "name": "diario_amalia",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "@sentry/profiling-node": "^10.42.0",
+    "dotenv": "^17.4.2",
+    "mongodb": "^7.2.0",
+    "node-cron": "^4.2.1"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.7.4"
+  },
+  "scripts": {
+    "format": "prettier --write \"**/*.{js,jsx,json}\"",
+    "format:check": "prettier --check .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky",
+    "// --- DEVELOPMENT ---": "",
+    "dev:up": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up",
+    "dev:build": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
+    "dev:down": "docker compose -f docker-compose.yml -f docker-compose.dev.yml down",
+    "// --- PRODUCTION ---": "",
+    "prod:up": "docker compose up",
+    "prod:build": "docker compose up --build",
+    "prod:down": "docker compose down",
+    "// --- THE NUCLEAR OPTION ---": "",
+    "docker:clean": "docker compose -f docker-compose.yml -f docker-compose.dev.yml down -v --rmi all --remove-orphans",
+    "// --- DEPLOY ---": "",
+    "deploy": "docker compose up -d --build"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,json}": [
+      "prettier --write"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.inesctec.pt:LIAAD/amalia/diario-amalia.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}

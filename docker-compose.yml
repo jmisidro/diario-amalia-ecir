@@ -1,0 +1,126 @@
+services:
+  db_diario:
+    image: mongo:6
+    container_name: db_diario
+    command: mongod --port 27018 --auth
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
+    volumes:
+      - mongo_data_diario:/data/db # Volume específico
+    healthcheck:
+      # The '--quiet' flag and '> /dev/null' prevent terminal spam
+      test: ["CMD-SHELL", "mongosh --quiet --port 27018 --username $$MONGO_ROOT_USER --password $$MONGO_ROOT_PASSWORD
+        --authenticationDatabase admin --eval \"db.adminCommand('ping')\" > /dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    restart: always
+    networks:
+      - diario_network
+
+  opensearch_diario:
+    image: opensearchproject/opensearch:latest
+    container_name: opensearch_diario
+    environment:
+      - discovery.type=single-node
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "DISABLE_INSTALL_DEMO_CONFIG=true"
+      - "DISABLE_SECURITY_PLUGIN=true" # Disabling security for local development to avoid SSL/Auth complexity
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_PASSWORD}
+      - OPENSEARCH_PASSWORD=${OPENSEARCH_PASSWORD}
+    env_file:
+      - .env
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch_data_diario:/usr/share/opensearch/data
+    networks:
+      - diario_network
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  backend_diario:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend_diario
+    env_file:
+      - .env
+    environment:
+      - TZ=Europe/Lisbon
+    depends_on:
+      db_diario:
+        condition: service_healthy
+      python_api_diario:
+        condition: service_healthy
+    restart: always
+    networks:
+      - diario_network
+
+  frontend_diario:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - API_URL=${API_URL}
+    container_name: frontend_diario
+    ports:
+      - "3001:3000"
+    env_file:
+      - .env
+    depends_on:
+      - "backend_diario"
+    restart: always
+    networks:
+      - diario_network
+
+  python_api_diario:
+    build:
+      context: ./backend/ai_cluster
+      dockerfile: Dockerfile
+    container_name: python_api_diario
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    environment:
+      - API_URL=${API_URL}
+      - TZ=Europe/Lisbon
+    depends_on:
+      db_diario:
+        condition: service_healthy
+      opensearch_diario:
+        condition: service_healthy
+    restart: always
+    networks:
+      - diario_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  mongo_data_diario:
+  opensearch_data_diario:
+
+networks:
+  diario_network:
+    name: diario_network
+    # driver: bridge
+    # driver_opts:
+      # Reduce MTU due to VPN
+      # com.docker.network.driver.mtu: 1400
+
