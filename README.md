@@ -25,7 +25,7 @@ Official repository for the ECIR 2027 demo paper: **"Diário do AMALIA: Semantic
 
 This repository contains the full source code, news ingestion pipelines, AI clustering services, hybrid RAG engine, and step-by-step instructions to run the **Diário do AMALIA** platform locally.
 
-> **Try the Live Demo**: [https://diario.amalia.inesctec.pt](https://diario.amalia.inesctec.pt)
+> **Try the Live Demo**: [https://diariodoamalia.inesctec.pt/](https://diariodoamalia.inesctec.pt/)
 
 
 ## Overview
